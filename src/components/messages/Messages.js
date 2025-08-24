@@ -87,6 +87,11 @@ const Messages = () => {
   const handleSendMessage = async () => {
     try {
       setSending(true);
+      
+      // Debug: Log the data being sent
+      console.log('Sending message with data:', formData);
+      console.log('Device ID being sent:', formData.deviceId);
+      
       // Use the exact endpoint from Postman collection
       const response = await axios.post('/whatsapp/send', formData);
       if (response.data.error === 0) {
@@ -159,6 +164,12 @@ const Messages = () => {
           <FaPlus className="me-2" />
           Send Message
         </Button>
+        
+        {devices.length === 0 && (
+          <small className="text-muted d-block mt-2">
+            No WhatsApp devices available. Please connect a device first.
+          </small>
+        )}
       </div>
 
       {/* Filters */}
@@ -332,11 +343,16 @@ const Messages = () => {
                   >
                     <option value="">Select a device</option>
                     {devices.map((device) => (
-                      <option key={device.id} value={device.id}>
+                      <option key={device.deviceId} value={device.deviceId}>
                         {device.deviceName} ({device.phoneNumber})
                       </option>
                     ))}
                   </FormSelect>
+                  {formData.deviceId && (
+                    <Form.Text className="text-success">
+                      ✓ Selected Device ID: <strong>{formData.deviceId}</strong>
+                    </Form.Text>
+                  )}
                 </Form.Group>
               </Col>
               <Col md={6}>

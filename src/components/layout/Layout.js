@@ -10,7 +10,8 @@ import {
   FaAddressBook, 
   FaUsers, 
   FaSignOutAlt,
-  FaUser
+  FaUser,
+  FaLayerGroup
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 
@@ -30,6 +31,7 @@ const Layout = () => {
     { path: '/devices', label: 'WhatsApp Devices', icon: FaMobile },
     { path: '/messages', label: 'Messages', icon: FaComments },
     { path: '/contacts', label: 'Contacts', icon: FaAddressBook },
+    { path: '/groups', label: 'Groups', icon: FaLayerGroup },
     { path: '/users', label: 'Users', icon: FaUsers },
   ];
 

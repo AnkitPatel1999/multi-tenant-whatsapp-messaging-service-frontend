@@ -9,7 +9,8 @@ import {
   FaUsers,
   FaPlus,
   FaQrcode,
-  FaPaperPlane
+  FaPaperPlane,
+  FaLayerGroup
 } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
@@ -22,7 +23,8 @@ const Dashboard = () => {
     devices: 0,
     messages: 0,
     contacts: 0,
-    users: 0
+    users: 0,
+    groups: 0
   });
   const [recentDevices, setRecentDevices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +57,12 @@ const Dashboard = () => {
         setStats(prev => ({ ...prev, users: usersResponse.data.data.length }));
       }
 
+      // Fetch groups count
+      const groupsResponse = await axios.get('/groups');
+      if (groupsResponse.data.error === 0) {
+        setStats(prev => ({ ...prev, groups: groupsResponse.data.data.length }));
+      }
+
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Failed to load dashboard data');
@@ -73,7 +81,7 @@ const Dashboard = () => {
   };
 
   const StatCard = ({ title, value, icon: Icon, variant, description }) => (
-    <Col lg={3} md={6} className="mb-4">
+    <Col lg={2} md={6} className="mb-4">
       <Card className="border-0 shadow-sm h-100">
         <Card.Body className="d-flex align-items-center">
           <div className={`bg-${variant} bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3`}
@@ -91,10 +99,25 @@ const Dashboard = () => {
   );
 
   const QuickActionCard = ({ title, description, icon: Icon, variant, onClick }) => (
-    <Col lg={4} md={6} className="mb-4">
+    <Col lg={3} md={6} className="mb-4">
       <Card className="border-0 shadow-sm h-100 quick-action-card"
-        style={{ cursor: 'pointer' }}
-        onClick={onClick}>
+        style={{ 
+          cursor: 'pointer',
+          transition: 'all 0.2s ease-in-out'
+        }}
+        onClick={onClick}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+          e.currentTarget.style.border = `2px solid var(--bs-${variant})`;
+          e.currentTarget.style.color = `var(--bs-${variant})`;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'translateY(0)';
+          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+          e.currentTarget.style.border = 'none';
+          e.currentTarget.style.color = 'inherit';
+        }}>
         <Card.Body className="text-center p-4">
           <div className={`bg-${variant} bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3`}
             style={{ width: '80px', height: '80px' }}>
@@ -102,6 +125,10 @@ const Dashboard = () => {
           </div>
           <h5 className="fw-bold mb-2">{title}</h5>
           <p className="text-muted mb-0 small">{description}</p>
+          <small className="text-muted mt-2 d-block">
+            <i className="fas fa-arrow-right me-1"></i>
+            Click to navigate
+          </small>
         </Card.Body>
       </Card>
     </Col>
@@ -156,6 +183,13 @@ const Dashboard = () => {
           variant="warning"
           description="Team members"
         />
+        <StatCard
+          title="Groups"
+          value={stats.groups}
+          icon={FaLayerGroup}
+          variant="secondary"
+          description="Chat groups"
+        />
       </Row>
 
       {/* Quick Actions */}
@@ -170,7 +204,7 @@ const Dashboard = () => {
           description="Connect a new WhatsApp device to start messaging"
           icon={FaPlus}
           variant="success"
-          onClick={() => {/* Navigate to devices page */ }}
+          onClick={() => navigate('/devices')}
         />
         <QuickActionCard
           title="Generate QR"
@@ -184,7 +218,14 @@ const Dashboard = () => {
           description="Send a quick message to your contacts"
           icon={FaPaperPlane}
           variant="info"
-          onClick={() => {/* Navigate to messages page */ }}
+          onClick={() => navigate('/messages')}
+        />
+        <QuickActionCard
+          title="Manage Groups"
+          description="Create and manage chat groups"
+          icon={FaLayerGroup}
+          variant="secondary"
+          onClick={() => navigate('/groups')}
         />
       </Row>
 
@@ -223,7 +264,7 @@ const Dashboard = () => {
                 <FaWhatsapp size={48} className="text-muted mb-3" />
                 <h5 className="text-muted">No devices connected</h5>
                 <p className="text-muted mb-3">Connect your first WhatsApp device to get started</p>
-                <Button variant="success">
+                <Button variant="success" onClick={() => navigate('/devices')}>
                   <FaPlus className="me-2" />
                   Add Device
                 </Button>

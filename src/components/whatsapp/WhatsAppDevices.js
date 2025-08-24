@@ -38,9 +38,26 @@ const WhatsAppDevices = () => {
   const [qrCode, setQrCode] = useState('');
   const [qrString, setQrString] = useState('');
   const [creating, setCreating] = useState(false);
+  const [isPolling, setIsPolling] = useState(false);
   const [formData, setFormData] = useState({
     deviceName: ''
   });
+
+  // Add CSS animation for spinning icon
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   useEffect(() => {
     fetchDevices();
@@ -49,8 +66,17 @@ const WhatsAppDevices = () => {
   // Auto-refresh device status when QR modal is open
   useEffect(() => {
     let interval;
-    if (showQRModal && selectedDevice) {
+    if (showQRModal && selectedDevice && isPolling) {
       interval = setInterval(() => {
+        // Check if device is already connecting or connected
+        const device = findDeviceById(selectedDevice);
+        if (device && (device.status === 'connecting' || device.status === 'connected')) {
+          // Stop polling if device is already connecting/connected
+          setIsPolling(false);
+          clearInterval(interval);
+          return;
+        }
+        
         // Silent background refresh - don't show loading states or toasts
         fetchDevicesSilently();
       }, 5000); // Check every 5 seconds
@@ -58,7 +84,7 @@ const WhatsAppDevices = () => {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [showQRModal, selectedDevice]);
+  }, [showQRModal, selectedDevice, isPolling]);
 
   const fetchDevices = async () => {
     try {
@@ -84,6 +110,21 @@ const WhatsAppDevices = () => {
       if (response.data.error === 0) {
         // Only update devices state, no console logs or user notifications
         setDevices(response.data.data);
+        
+        // Check if the selected device is now connected
+        if (selectedDevice) {
+          const device = response.data.data.find(d => d.deviceId === selectedDevice);
+          if (device && device.status === 'connected') {
+            // Device is connected, show success message and close modal
+            toast.success('Device connected successfully! QR code modal will close.');
+            setTimeout(() => {
+              setShowQRModal(false);
+              setSelectedDevice(null);
+              setQrCode('');
+              setQrString('');
+            }, 2000); // Give user 2 seconds to see the success message
+          }
+        }
       }
     } catch (error) {
       // Silent error handling - only log to console, no user notification
@@ -122,6 +163,7 @@ const WhatsAppDevices = () => {
       setQrCode(''); // Clear previous QR code
       setQrString(''); // Clear previous QR string
       setShowQRModal(true);
+      setIsPolling(true); // Start background polling
 
       // Use the exact endpoint from Postman collection
       const response = await axios.post(`/whatsapp/devices/${deviceId}/qr`);
@@ -499,8 +541,14 @@ const WhatsAppDevices = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* QR Code Modal */}
-      <Modal show={showQRModal} onHide={() => setShowQRModal(false)} size="lg">
+             {/* QR Code Modal */}
+       <Modal show={showQRModal} onHide={() => {
+         setShowQRModal(false);
+         setIsPolling(false); // Stop polling when modal closes
+         setSelectedDevice(null);
+         setQrCode('');
+         setQrString('');
+       }} size="lg">
         <Modal.Header closeButton>
           <Modal.Title>
             <FaQrcode className="me-2 text-primary" />
@@ -554,44 +602,61 @@ const WhatsAppDevices = () => {
                  </small>
                </div>
 
-                             {/* Device Status Indicator */}
-               {selectedDevice && (
-                 <div className="mt-3">
-                   <div className="d-flex align-items-center justify-content-center">
-                     {(() => {
-                       const device = findDeviceById(selectedDevice);
-                       if (device) {
-                         return (
-                           <div className="d-flex align-items-center">
-                             {getStatusIcon(device.status)}
-                             <span className="ms-2">
-                               <strong>Status:</strong> {device.status}
-                             </span>
-                             {device.status === 'connected' && (
-                               <span className="ms-2 text-success">
-                                 <FaCheckCircle /> Connected to WhatsApp
-                               </span>
-                             )}
-                           </div>
-                         );
-                       }
-                       return (
-                         <div className="d-flex align-items-center">
-                           <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
-                             <span className="visually-hidden">Loading...</span>
-                           </div>
-                           <small className="text-muted">
-                             Loading device status...
-                           </small>
-                         </div>
-                       );
-                     })()}
-                   </div>
-                 </div>
-               )}
+                                                           {/* Device Status Indicator */}
+                {selectedDevice && (
+                  <div className="mt-3">
+                    <div className="d-flex align-items-center justify-content-center">
+                      {(() => {
+                        const device = findDeviceById(selectedDevice);
+                        if (device) {
+                          return (
+                            <div className="d-flex align-items-center">
+                              {getStatusIcon(device.status)}
+                              <span className="ms-2">
+                                <strong>Status:</strong> {device.status}
+                              </span>
+                              {device.status === 'connected' && (
+                                <span className="ms-2 text-success">
+                                  <FaCheckCircle /> Connected to WhatsApp
+                                </span>
+                              )}
+                            </div>
+                          );
+                        }
+                        return (
+                          <div className="d-flex align-items-center">
+                            <div className="spinner-border spinner-border-sm text-primary me-2" role="status">
+                              <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <small className="text-muted">
+                              Loading device status...
+                            </small>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                    
+                    {/* Background Polling Status */}
+                    <div className="mt-2 text-center">
+                      <small className={`${isPolling ? 'text-success' : 'text-muted'}`}>
+                        {isPolling ? (
+                          <>
+                            <FaSync className="me-1" style={{ animation: 'spin 1s linear infinite' }} />
+                            Background status checking active
+                          </>
+                        ) : (
+                          <>
+                            <FaPowerOff className="me-1" />
+                            Background status checking stopped
+                          </>
+                        )}
+                      </small>
+                    </div>
+                  </div>
+                )}
 
-              <div className="d-flex gap-2 justify-content-center">
-                                 <Button
+                             <div className="d-flex gap-2 justify-content-center">
+                 <Button
                    variant="outline-primary"
                    onClick={() => {
                      // Refresh devices silently without closing modal
@@ -601,6 +666,19 @@ const WhatsAppDevices = () => {
                  >
                    <FaSync className="me-2" />
                    Check Connection Status
+                 </Button>
+                 
+                 <Button
+                   variant="outline-warning"
+                   onClick={() => {
+                     // Stop background polling manually
+                     setIsPolling(false);
+                     toast.success('Background status checking stopped');
+                   }}
+                   disabled={!isPolling}
+                 >
+                   <FaPowerOff className="me-2" />
+                   Stop Auto-Check
                  </Button>
                                            <Button
                              variant="outline-success"

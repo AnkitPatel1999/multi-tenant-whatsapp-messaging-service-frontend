@@ -11,6 +11,7 @@ import WhatsAppDevices from './components/whatsapp/WhatsAppDevices';
 import Messages from './components/messages/Messages';
 import Contacts from './components/contacts/Contacts';
 import Users from './components/users/Users';
+import Groups from './components/groups/Groups';
 import Layout from './components/layout/Layout';
 
 // Context
@@ -84,6 +85,7 @@ const AppRoutes = () => {
         <Route path="devices" element={<WhatsAppDevices />} />
         <Route path="messages" element={<Messages />} />
         <Route path="contacts" element={<Contacts />} />
+        <Route path="groups" element={<Groups />} />
         <Route path="users" element={<Users />} />
       </Route>
       {/* Redirect authenticated users from /login to dashboard */}
