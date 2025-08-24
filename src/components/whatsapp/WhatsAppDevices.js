@@ -127,21 +127,30 @@ const WhatsAppDevices = () => {
       const response = await axios.post(`/whatsapp/devices/${deviceId}/qr`);
       console.log('QR Response:', response.data);
       
-      if (response.data.error === 0) {
-        // The backend returns a QR code string, not an image
-        const qrString = response.data.data.qrCode;
-        
-        if (qrString) {
-          // Store the original string
-          setQrString(qrString);
-          // Generate a simple QR code representation
-          const qrImageData = generateSimpleQRCode(qrString);
-          setQrCode(qrImageData);
-          toast.success('QR code generated successfully!');
-        } else {
-          throw new Error('No QR code data received');
-        }
-      } else {
+             if (response.data.error === 0) {
+         // The backend now returns multiple QR code formats
+         const qrData = response.data.data;
+         
+         if (qrData.qrCodeImage) {
+           // Use the direct image data URL (recommended)
+           setQrCode(qrData.qrCodeImage);
+           setQrString(qrData.qrCode || ''); // Store original string for reference
+           toast.success('QR code generated successfully!');
+         } else if (qrData.qrCodeBase64) {
+           // Fallback to base64 string
+           setQrCode(`data:image/png;base64,${qrData.qrCodeBase64}`);
+           setQrString(qrData.qrCode || '');
+           toast.success('QR code generated successfully!');
+         } else if (qrData.qrCode) {
+           // Legacy fallback - generate simple representation
+           setQrString(qrData.qrCode);
+           const qrImageData = generateSimpleQRCode(qrData.qrCode);
+           setQrCode(qrImageData);
+           toast.success('QR code generated successfully!');
+         } else {
+           throw new Error('No QR code data received');
+         }
+       } else {
         throw new Error(response.data.message || 'Failed to generate QR code');
       }
     } catch (error) {
@@ -509,51 +518,41 @@ const WhatsAppDevices = () => {
                <div className="mb-4">
                  <div className="bg-light rounded p-3 d-inline-block">
                    <div className="text-center">
-                     <div className="alert alert-info mb-3">
-                       <strong>Generated QR Code:</strong> This is a visual representation of the QR code string from the backend.
-                     </div>
+                                           <div className="alert alert-success mb-3">
+                        <strong>✅ QR Code Generated!</strong> This is a scannable QR code image from the backend.
+                      </div>
                      <img
                        src={qrCode}
                        alt="Generated QR Code"
                        className="img-fluid border rounded shadow-sm"
                        style={{ maxWidth: '300px', minWidth: '250px' }}
                      />
-                     <div className="mt-3">
-                       <small className="text-muted">
-                         <strong>Backend QR String:</strong> {qrString}
-                       </small>
-                     </div>
+                                            <div className="mt-3">
+                         <small className="text-muted">
+                           <strong>QR Code Format:</strong> {qrCode.startsWith('data:image/') ? 'Image (Scannable)' : 'Generated Representation'}
+                         </small>
+                       </div>
                    </div>
                  </div>
                </div>
 
                              <div className="text-start mb-4">
-                 <h6 className="fw-bold mb-3">Current Situation:</h6>
-                 <div className="alert alert-info">
-                   <p className="mb-2"><strong>Backend Response:</strong> The backend is returning a QR code string instead of a QR code image.</p>
-                   <p className="mb-2"><strong>What you need:</strong> A QR code image that can be scanned by WhatsApp.</p>
-                   <p className="mb-0"><strong>Solution:</strong> Use a QR code generator tool or library to convert this string into a scannable QR code image.</p>
-                 </div>
-                 
-                 <h6 className="fw-bold mb-3">How to proceed:</h6>
+                 <h6 className="fw-bold mb-3">🎯 How to Connect Your Device:</h6>
                  <ol className="text-muted">
-                   <li className="mb-2">Copy the QR code string above</li>
-                   <li className="mb-2">Use an online QR code generator (e.g., qr-code-generator.com)</li>
-                   <li className="mb-2">Paste the string and generate the QR code image</li>
                    <li className="mb-2">Open WhatsApp on your mobile phone</li>
                    <li className="mb-2">Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
                    <li className="mb-2">Tap <strong>Link a Device</strong></li>
-                   <li className="mb-2">Point your phone camera at the generated QR code image</li>
+                   <li className="mb-2">Point your phone camera at the QR code above</li>
                    <li className="mb-2">Wait for the connection to complete</li>
                  </ol>
                </div>
 
-              <div className="alert alert-info">
-                <small>
-                  <strong>Note:</strong> Keep this window open until you've successfully scanned the QR code.
-                  The QR code will expire after a few minutes for security reasons.
-                </small>
-              </div>
+                             <div className="alert alert-success">
+                 <small>
+                   <strong>✅ Success!</strong> You now have a scannable QR code image. Keep this window open until you've successfully scanned the QR code.
+                   The QR code will expire after a few minutes for security reasons.
+                 </small>
+               </div>
 
                              {/* Device Status Indicator */}
                {selectedDevice && (
@@ -620,15 +619,7 @@ const WhatsAppDevices = () => {
                              <FaCopy className="me-2" />
                              Copy QR String
                            </Button>
-                                           <Button
-                             variant="outline-warning"
-                             onClick={() => {
-                               window.open('https://www.qr-code-generator.com/', '_blank');
-                             }}
-                           >
-                             <FaQrcode className="me-2" />
-                             Generate QR Image
-                           </Button>
+                
                            <Button
                              variant="outline-secondary"
                              onClick={() => setShowQRModal(false)}
