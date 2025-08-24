@@ -1,70 +1,219 @@
-# Getting Started with Create React App
+# Alchemy WhatsApp Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A modern, responsive React frontend for the Alchemy WhatsApp Backend API. Built with Bootstrap CSS for a beautiful and professional user interface.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- 🔐 **Authentication System** - JWT-based login with role-based access control
+- 📱 **WhatsApp Device Management** - Create, connect, and manage WhatsApp devices
+- 💬 **Messaging** - Send messages and view message history
+- 👥 **Contact Management** - Manage WhatsApp contacts with search and CRUD operations
+- 👤 **User Management** - Admin panel for managing system users and permissions
+- 📊 **Dashboard** - Overview of system statistics and recent activity
+- 🎨 **Modern UI** - Beautiful Bootstrap-based interface with responsive design
+- 📱 **Mobile Responsive** - Works perfectly on all device sizes
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Frontend Framework**: React 19
+- **CSS Framework**: Bootstrap 5.3.2
+- **UI Components**: React Bootstrap
+- **Routing**: React Router DOM
+- **HTTP Client**: Axios
+- **Icons**: React Icons (FontAwesome)
+- **Notifications**: React Hot Toast
+- **State Management**: React Context API
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+- Node.js 18+ 
+- npm or yarn
+- Alchemy Backend running (see backend documentation)
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Installation
 
-### `npm run build`
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd alchemy-frontend
+   ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+3. **Configure environment variables**
+   Create a `.env` file in the root directory:
+   ```env
+   REACT_APP_API_URL=http://localhost:3000
+   ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
 
-### `npm run eject`
+5. **Open your browser**
+   Navigate to `http://localhost:3000`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Backend API Endpoints
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The frontend integrates with the following backend endpoints:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Authentication
+- `POST /auth/login` - User login
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### WhatsApp Devices
+- `GET /whatsapp/devices` - List devices
+- `POST /whatsapp/devices` - Create device
+- `POST /whatsapp/generate-qr` - Generate QR code
+- `POST /whatsapp/disconnect` - Disconnect device
+- `DELETE /whatsapp/devices/:id` - Delete device
+- `POST /whatsapp/send-message` - Send message
 
-## Learn More
+### Messages
+- `GET /messages` - List messages with filters
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Contacts
+- `GET /contacts` - List contacts
+- `POST /contacts` - Create contact
+- `PUT /contacts/:id` - Update contact
+- `DELETE /contacts/:id` - Delete contact
+- `POST /contacts/sync` - Sync contacts
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Users
+- `GET /users` - List users
+- `POST /users` - Create user
+- `PUT /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
 
-### Code Splitting
+## Project Structure
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+src/
+├── components/
+│   ├── auth/
+│   │   └── Login.js          # Login component
+│   ├── dashboard/
+│   │   └── Dashboard.js      # Main dashboard
+│   ├── whatsapp/
+│   │   └── WhatsAppDevices.js # Device management
+│   ├── messages/
+│   │   └── Messages.js       # Message handling
+│   ├── contacts/
+│   │   └── Contacts.js       # Contact management
+│   ├── users/
+│   │   └── Users.js          # User management
+│   └── layout/
+│       └── Layout.js         # Main layout with navigation
+├── context/
+│   └── AuthContext.js        # Authentication context
+├── App.js                    # Main app component
+└── index.js                  # Entry point
+```
 
-### Analyzing the Bundle Size
+## Usage
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Login
+1. Navigate to the login page
+2. Use demo credentials:
+   - Email: `admin@example.com`
+   - Password: `SecurePassword123!`
 
-### Making a Progressive Web App
+### Dashboard
+- View system statistics
+- Quick access to main features
+- Recent device activity
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### WhatsApp Devices
+1. **Add Device**: Click "Add Device" and provide a name
+2. **Connect**: Generate QR code and scan with WhatsApp mobile app
+3. **Monitor**: View device status and connection details
+4. **Manage**: Disconnect or delete devices as needed
 
-### Advanced Configuration
+### Messaging
+1. **Send Messages**: Select device, recipient, and compose message
+2. **View History**: Browse message history with filters
+3. **Track Status**: Monitor message delivery and status
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### Contacts
+1. **Add Contacts**: Manually add new contacts
+2. **Sync**: Sync contacts from WhatsApp
+3. **Search**: Find contacts quickly with search functionality
+4. **Manage**: Edit and delete contacts as needed
 
-### Deployment
+### User Management
+1. **Create Users**: Add new system users with roles
+2. **Set Permissions**: Assign admin or regular user roles
+3. **Manage Status**: Activate/deactivate users
+4. **Security**: Secure user management with proper validation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Development
 
-### `npm run build` fails to minify
+### Available Scripts
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `npm start` - Start development server
+- `npm build` - Build for production
+- `npm test` - Run tests
+- `npm eject` - Eject from Create React App
+
+### Code Style
+
+- Use functional components with hooks
+- Follow React best practices
+- Use Bootstrap classes for styling
+- Implement proper error handling
+- Add loading states for better UX
+
+### Adding New Features
+
+1. Create new component in appropriate directory
+2. Add route in `App.js`
+3. Update navigation in `Layout.js`
+4. Implement API integration with proper error handling
+5. Add toasts for user feedback
+
+## Deployment
+
+### Build for Production
+```bash
+npm run build
+```
+
+### Environment Variables
+Set `REACT_APP_API_URL` to your production backend URL.
+
+### Static Hosting
+The build folder can be deployed to any static hosting service:
+- Netlify
+- Vercel
+- AWS S3
+- GitHub Pages
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For support and questions:
+- Check the backend API documentation
+- Review the Swagger docs at `/api/docs`
+- Open an issue in the repository
+
+## Screenshots
+
+*Add screenshots of the application here*
+
+---
+
+Built with ❤️ using React and Bootstrap

@@ -1,0 +1,584 @@
+{
+	"info": {
+		"_postman_id": "51e60434-7873-4b45-805a-09954b1c429b",
+		"name": "alchemy-assignment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15072860"
+	},
+	"item": [
+		{
+			"name": "create-user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"ankit1\",\r\n  \"password\": \"password123\",\r\n  \"groupId\": \"09b113ff-1881-46f1-897e-39571257ab99\",\r\n  \"email\": \"ankit@allevents.in\",\r\n  \"phoneNumber\": \"+918849476499\",\r\n  \"isAdmin\": false,\r\n  \"name\": \"Ankit1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/users/",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth/login",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"admin@example.com\",\r\n  \"password\": \"admin123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/auth/login",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-all-users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/users",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-/users/{userId}",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/users/1b3d96f8-7449-4bd7-b5a9-bc317c8abc53",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						"1b3d96f8-7449-4bd7-b5a9-bc317c8abc53"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-users/userid",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/users/68ea8e14-88ce-46f9-b22b-82aa2727f549",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						"68ea8e14-88ce-46f9-b22b-82aa2727f549"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-whatsapp/devices",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"deviceName\": \"HELLO deviceName\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}} /whatsapp/devices",
+					"host": [
+						"{{baseURL}} "
+					],
+					"path": [
+						"whatsapp",
+						"devices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-whatsapp/devices",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}} /whatsapp/devices",
+					"host": [
+						"{{baseURL}} "
+					],
+					"path": [
+						"whatsapp",
+						"devices"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/whatsapp/devices/{deviceId}/qr",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}} /whatsapp/devices/9913f023-599b-455c-994d-98d759dcf5e2/qr",
+					"host": [
+						"{{baseURL}} "
+					],
+					"path": [
+						"whatsapp",
+						"devices",
+						"9913f023-599b-455c-994d-98d759dcf5e2",
+						"qr"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "/whatsapp/send",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"deviceId\": \"9913f023-599b-455c-994d-98d759dcf5e2\",\r\n  \"to\": \"919712448793\",\r\n  \"message\": \"Hello! This is a test message from the API.\",\r\n  \"type\": \"text\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}} /whatsapp/send",
+					"host": [
+						"{{baseURL}} "
+					],
+					"path": [
+						"whatsapp",
+						"send"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete-/users/userid",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/users/1b3d96f8-7449-4bd7-b5a9-bc317c8abc53",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"users",
+						"1b3d96f8-7449-4bd7-b5a9-bc317c8abc53"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "link-/users/{userid}/group",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"groupId\": \"09b113ff-1881-46f1-897e-39571257ab99\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}} /users/1b3d96f8-7449-4bd7-b5a9-bc317c8abc53/group",
+					"host": [
+						"{{baseURL}} "
+					],
+					"path": [
+						"users",
+						"1b3d96f8-7449-4bd7-b5a9-bc317c8abc53",
+						"group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "status-whatsapp/devices/9913f023-599b-455c-994d-98d759dcf5e2/status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"admin@example.com\",\r\n  \"password\": \"admin123\"\r\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/whatsapp/devices/9913f023-599b-455c-994d-98d759dcf5e2/status",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"whatsapp",
+						"devices",
+						"9913f023-599b-455c-994d-98d759dcf5e2",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "messages?userId=1ccefc49-d921-4572-b5b6-e9cbd625d101&limit=20",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/messages?userId=1ccefc49-d921-4572-b5b6-e9cbd625d101&limit=20",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"messages"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "1ccefc49-d921-4572-b5b6-e9cbd625d101"
+						},
+						{
+							"key": "limit",
+							"value": "20"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get-contacts",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{baseURL}}/contacts",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create-contacts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"contactName\": \"Jane Doe\",\r\n  \"phoneNumber\": \"+919712448793\", \r\n  \"email\": \"jane.doe@example.com\",\r\n  \"notes\": \"Potential customer from website inquiry\"\r\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/contacts",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"contacts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "disconnect divice - whatsapp/devices/9913f023-599b-455c-994d-98d759dcf5e2/disconnect",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{JWT Token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"admin@example.com\",\r\n  \"password\": \"admin123\"\r\n}"
+				},
+				"url": {
+					"raw": "{{baseURL}}/whatsapp/devices/9913f023-599b-455c-994d-98d759dcf5e2/disconnect",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"whatsapp",
+						"devices",
+						"9913f023-599b-455c-994d-98d759dcf5e2",
+						"disconnect"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://localhost:3000",
+			"type": "default"
+		},
+		{
+			"key": "JWT Token",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
