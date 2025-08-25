@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import WhatsAppDeviceDetails from './WhatsAppDeviceDetails';
 import {
   Row,
   Col,
@@ -24,7 +25,11 @@ import {
   FaTimesCircle,
   FaExclamationTriangle,
   FaDownload,
-  FaCopy
+  FaCopy,
+  FaComments,
+  FaAddressBook,
+  FaUsers,
+  FaEye
 } from 'react-icons/fa';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -42,6 +47,8 @@ const WhatsAppDevices = () => {
   const [formData, setFormData] = useState({
     deviceName: ''
   });
+  const [showDeviceDetails, setShowDeviceDetails] = useState(false);
+  const [selectedDeviceForDetails, setSelectedDeviceForDetails] = useState(null);
 
   // Add CSS animation for spinning icon
   useEffect(() => {
@@ -70,11 +77,26 @@ const WhatsAppDevices = () => {
       interval = setInterval(() => {
         // Check if device is already connecting or connected
         const device = findDeviceById(selectedDevice);
-        if (device && (device.status === 'connecting' || device.status === 'connected')) {
-          // Stop polling if device is already connecting/connected
-          setIsPolling(false);
-          clearInterval(interval);
-          return;
+        if (device && (device.isConnected === true)) {
+          // Only auto-close if device was previously disconnected (new connection)
+          // Don't auto-close if device was already connected when QR was generated
+          const wasPreviouslyDisconnected = !devices.find(d => d.deviceId === selectedDevice)?.isConnected;
+          
+          if (wasPreviouslyDisconnected) {
+            // Stop polling if device is newly connected
+            setIsPolling(false);
+            clearInterval(interval);
+            
+            // Show success message and close modal
+            toast.success('🎉 Device connected successfully! You can now send WhatsApp messages.');
+            setTimeout(() => {
+              setShowQRModal(false);
+              setSelectedDevice(null);
+              setQrCode('');
+              setQrString('');
+            }, 2000); // Give user 2 seconds to see the success message
+            return;
+          }
         }
         
         // Silent background refresh - don't show loading states or toasts
@@ -114,15 +136,21 @@ const WhatsAppDevices = () => {
         // Check if the selected device is now connected
         if (selectedDevice) {
           const device = response.data.data.find(d => d.deviceId === selectedDevice);
-          if (device && device.status === 'connected') {
-            // Device is connected, show success message and close modal
-            toast.success('Device connected successfully! QR code modal will close.');
-            setTimeout(() => {
-              setShowQRModal(false);
-              setSelectedDevice(null);
-              setQrCode('');
-              setQrString('');
-            }, 2000); // Give user 2 seconds to see the success message
+          if (device && device.isConnected === true) {
+            // Only auto-close if device was previously disconnected (new connection)
+            // Don't auto-close if device was already connected when QR was generated
+            const wasPreviouslyDisconnected = !devices.find(d => d.deviceId === selectedDevice)?.isConnected;
+            
+            if (wasPreviouslyDisconnected) {
+              // Device is newly connected, show success message and close modal
+              toast.success('🎉 Device connected successfully! You can now send WhatsApp messages.');
+              setTimeout(() => {
+                setShowQRModal(false);
+                setSelectedDevice(null);
+                setQrCode('');
+                setQrString('');
+              }, 2000); // Give user 2 seconds to see the success message
+            }
           }
         }
       }
@@ -143,7 +171,16 @@ const WhatsAppDevices = () => {
         fetchDevices();
       }
     } catch (error) {
-      toast.error('Failed to create device: ' + error.message);
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      const errorMessage = error.response?.data?.message || error.message;
+      
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else if (errorMessage.includes('not connected') || errorMessage.includes('connect device')) {
+        toast.error('Device not connected! Please generate a QR code and scan it with WhatsApp first.');
+      } else {
+        toast.error('Failed to create device: ' + errorMessage);
+      }
     } finally {
       setCreating(false);
     }
@@ -169,35 +206,53 @@ const WhatsAppDevices = () => {
       const response = await axios.post(`/whatsapp/devices/${deviceId}/qr`);
       console.log('QR Response:', response.data);
       
-             if (response.data.error === 0) {
-         // The backend now returns multiple QR code formats
-         const qrData = response.data.data;
-         
-         if (qrData.qrCodeImage) {
-           // Use the direct image data URL (recommended)
-           setQrCode(qrData.qrCodeImage);
-           setQrString(qrData.qrCode || ''); // Store original string for reference
-           toast.success('QR code generated successfully!');
-         } else if (qrData.qrCodeBase64) {
-           // Fallback to base64 string
-           setQrCode(`data:image/png;base64,${qrData.qrCodeBase64}`);
-           setQrString(qrData.qrCode || '');
-           toast.success('QR code generated successfully!');
-         } else if (qrData.qrCode) {
-           // Legacy fallback - generate simple representation
-           setQrString(qrData.qrCode);
-           const qrImageData = generateSimpleQRCode(qrData.qrCode);
-           setQrCode(qrImageData);
-           toast.success('QR code generated successfully!');
-         } else {
-           throw new Error('No QR code data received');
-         }
+      if (response.data.error === 0) {
+        // The backend now returns multiple QR code formats
+        const qrData = response.data.data;
+        
+        // Check if device is already connected
+        const currentDevice = devices.find(d => d.deviceId === deviceId);
+        if (currentDevice && currentDevice.isConnected) {
+          toast.info('ℹ️ Device is already connected to WhatsApp. This QR code can be used to reconnect if needed.');
+        }
+        
+        if (qrData.qrCodeImage) {
+          // Use the direct image data URL (recommended)
+          setQrCode(qrData.qrCodeImage);
+          setQrString(qrData.qrCode || ''); // Store original string for reference
+          toast.success('QR code generated successfully!');
+        } else if (qrData.qrCodeBase64) {
+          // Fallback to base64 string
+          setQrCode(`data:image/png;base64,${qrData.qrCodeBase64}`);
+          setQrString(qrData.qrCode || '');
+          toast.success('QR code generated successfully!');
+        } else if (qrData.qrCode) {
+          // Legacy fallback - generate simple representation
+          setQrString(qrData.qrCode);
+          const qrImageData = generateSimpleQRCode(qrData.qrCode);
+          setQrCode(qrImageData);
+          toast.success('QR code generated successfully!');
+        } else {
+          throw new Error('No QR code data received');
+        }
        } else {
         throw new Error(response.data.message || 'Failed to generate QR code');
       }
     } catch (error) {
       console.error('QR generation error:', error);
-      toast.error('Failed to generate QR code: ' + (error.response?.data?.message || error.message));
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      const errorMessage = error.response?.data?.message || error.message;
+      
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else if (errorMessage.includes('not connected') || errorMessage.includes('connect device')) {
+        toast.error('⚠️ Device not connected! Please connect the device to WhatsApp first.');
+      } else if (errorMessage.includes('Failed to send message')) {
+        toast.error('⚠️ Cannot send messages - device is not connected to WhatsApp. Please connect the device first.');
+      } else {
+        toast.error('Failed to generate QR code: ' + errorMessage);
+      }
+      
       setShowQRModal(false);
     }
   };
@@ -212,7 +267,12 @@ const WhatsAppDevices = () => {
           fetchDevices();
         }
       } catch (error) {
-        toast.error('Failed to disconnect device: ' + error.message);
+        const confidentialError = error.response?.data?.confidentialErrorMessage;
+        if (confidentialError) {
+          toast.error(confidentialError);
+        } else {
+          toast.error('Failed to disconnect device: ' + error.message);
+        }
       }
     }
   };
@@ -226,7 +286,12 @@ const WhatsAppDevices = () => {
           fetchDevices();
         }
       } catch (error) {
-        toast.error('Failed to delete device: ' + error.message);
+        const confidentialError = error.response?.data?.confidentialErrorMessage;
+        if (confidentialError) {
+          toast.error(confidentialError);
+        } else {
+          toast.error('Failed to delete device: ' + error.message);
+        }
       }
     }
   };
@@ -263,6 +328,16 @@ const WhatsAppDevices = () => {
   // Helper function to find device by ID
   const findDeviceById = (deviceId) => {
     return devices.find(d => d.deviceId === deviceId);
+  };
+
+  const handleViewDeviceDetails = (device) => {
+    setSelectedDeviceForDetails(device);
+    setShowDeviceDetails(true);
+  };
+
+  const handleBackToDevices = () => {
+    setShowDeviceDetails(false);
+    setSelectedDeviceForDetails(null);
   };
 
   // Function to generate a simple QR code representation
@@ -345,6 +420,16 @@ const WhatsAppDevices = () => {
     );
   }
 
+  // Show device details view if selected
+  if (showDeviceDetails && selectedDeviceForDetails) {
+    return (
+      <WhatsAppDeviceDetails
+        deviceId={selectedDeviceForDetails.deviceId}
+        onBack={handleBackToDevices}
+      />
+    );
+  }
+
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -361,36 +446,124 @@ const WhatsAppDevices = () => {
         </Button>
       </div>
 
-      {/* Quick Actions for Disconnected Devices */}
-      {devices.filter(device => device.status !== 'connected').length > 0 && (
-        <Card className="border-0 shadow-sm mb-4">
-          <Card.Body>
-            <div className="d-flex align-items-center justify-content-between">
-              <div>
-                <h6 className="mb-1">Quick QR Generation</h6>
-                <p className="text-muted mb-0 small">
-                  Generate QR codes for disconnected devices to connect them to WhatsApp
-                </p>
-              </div>
-              <Button
-                variant="primary"
-                onClick={() => {
-                  const disconnectedDevice = devices.find(device => device.status !== 'connected');
-                  if (disconnectedDevice) {
-                    console.log('Quick QR - Device object:', disconnectedDevice);
-                    console.log('Quick QR - Device ID:', disconnectedDevice.deviceId);
-                    handleGenerateQR(disconnectedDevice.deviceId);
-                  }
-                }}
-                disabled={!devices.some(device => device.status !== 'connected')}
-              >
-                <FaQrcode className="me-2" />
-                Generate QR for First Disconnected Device
-              </Button>
+             {/* Connection Status Warning */}
+       {devices.length > 0 && (
+         <Card className="border-0 shadow-sm mb-4">
+           <Card.Body>
+             <div className="d-flex align-items-center">
+               <FaExclamationTriangle className="text-warning me-3" size={24} />
+               <div className="flex-grow-1">
+                 <h6 className="mb-1 text-warning">⚠️ Device Connection Required</h6>
+                               <p className="text-muted mb-0 small">
+                {devices.filter(device => !device.isConnected).length > 0 
+                  ? `You have ${devices.filter(device => !device.isConnected).length} device(s) that need to be connected to WhatsApp before you can send messages.`
+                  : 'All devices are connected and ready to send messages!'
+                }
+              </p>
             </div>
-          </Card.Body>
-        </Card>
-      )}
+            {devices.filter(device => !device.isConnected).length > 0 && (
+                 <Button
+                   variant="warning"
+                   size="sm"
+                   onClick={() => {
+                     const disconnectedDevice = devices.find(device => device.status !== 'connected');
+                     if (disconnectedDevice) {
+                       handleGenerateQR(disconnectedDevice.deviceId);
+                     }
+                   }}
+                 >
+                   <FaQrcode className="me-2" />
+                   Connect Device
+                 </Button>
+               )}
+             </div>
+           </Card.Body>
+         </Card>
+       )}
+
+               {/* Quick Actions for Disconnected Devices */}
+        {devices.filter(device => !device.isConnected).length > 0 && (
+          <Card className="border-0 shadow-sm mb-4">
+            <Card.Body>
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 className="mb-1">Quick QR Generation</h6>
+                  <p className="text-muted mb-0 small">
+                    Generate QR codes for disconnected devices to connect them to WhatsApp
+                  </p>
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    const disconnectedDevice = devices.find(device => !device.isConnected);
+                    if (disconnectedDevice) {
+                      console.log('Quick QR - Device object:', disconnectedDevice);
+                      console.log('Quick QR - Device ID:', disconnectedDevice.deviceId);
+                      handleGenerateQR(disconnectedDevice.deviceId);
+                    }
+                  }}
+                  disabled={!devices.some(device => !device.isConnected)}
+                >
+                  <FaQrcode className="me-2" />
+                  Generate QR for First Disconnected Device
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
+        )}
+
+        {/* Connected Device Actions */}
+        {devices.filter(device => device.isConnected === true).length > 0 && (
+          <Card className="border-0 shadow-sm mb-4">
+            <Card.Body>
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  <h6 className="mb-1 text-success">🎉 Device Connected Successfully!</h6>
+                  <p className="text-muted mb-0 small">
+                    Your WhatsApp device is now connected and ready to use. You can:
+                  </p>
+                  <ul className="text-muted mb-0 small mt-2">
+                    <li>Send WhatsApp messages to contacts and groups</li>
+                    <li>View your message history</li>
+                    <li>Manage your contacts and groups</li>
+                    <li>Monitor message delivery status</li>
+                  </ul>
+                </div>
+                                 <div className="d-flex gap-2">
+                   <Button
+                     variant="outline-success"
+                     size="sm"
+                     onClick={() => {
+                       const connectedDevice = devices.find(device => device.isConnected === true);
+                       if (connectedDevice) {
+                         handleViewDeviceDetails(connectedDevice);
+                       }
+                     }}
+                   >
+                     <FaEye className="me-2" />
+                     View Device Details
+                   </Button>
+                   <Button
+                     variant="outline-primary"
+                     size="sm"
+                     onClick={() => window.location.href = '/contacts'}
+                   >
+                     <FaAddressBook className="me-2" />
+                     View Contacts
+                   </Button>
+                   <Button
+                     variant="outline-info"
+                     size="sm"
+                     onClick={() => window.location.href = '/groups'}
+                   >
+                     <FaUsers className="me-2" />
+                     View Groups
+                   </Button>
+                 </div>
+              </div>
+            </Card.Body>
+          </Card>
+        )}
 
       {/* Devices Table */}
       <Card className="border-0 shadow-sm">
@@ -402,7 +575,7 @@ const WhatsAppDevices = () => {
                   <th className="border-0 px-3 py-3">Device</th>
                   <th className="border-0 px-3 py-3">Phone Number</th>
                   <th className="border-0 px-3 py-3">Status</th>
-                  <th className="border-0 px-3 py-3">Last Seen</th>
+                  <th className="border-0 px-3 py-3">Last Activity</th>
                   <th className="border-0 px-3 py-3">Actions</th>
                 </tr>
               </thead>
@@ -424,48 +597,70 @@ const WhatsAppDevices = () => {
                     <td className="px-3 py-3">
                       <span className="fw-semibold">{device.phoneNumber}</span>
                     </td>
+                                         <td className="px-3 py-3">
+                       <div className="d-flex align-items-center">
+                         {getStatusIcon(device.isConnected ? 'connected' : 'disconnected')}
+                         <span className="ms-2">{getStatusBadge(device.isConnected ? 'connected' : 'disconnected')}</span>
+                       </div>
+                     </td>
                     <td className="px-3 py-3">
-                      <div className="d-flex align-items-center">
-                        {getStatusIcon(device.status)}
-                        <span className="ms-2">{getStatusBadge(device.status)}</span>
+                      <div>
+                        <div className="mb-1">
+                          <small className="text-muted">
+                            <strong>Last Connected:</strong> {device.lastConnectedAt ? new Date(device.lastConnectedAt).toLocaleString() : 'Never'}
+                          </small>
+                        </div>
+                        <div className="mb-1">
+                          <small className="text-muted">
+                            <strong>Last Contact Sync:</strong> {device.lastContactSync ? new Date(device.lastContactSync).toLocaleString() : 'Never'}
+                          </small>
+                        </div>
+                        <div>
+                          <small className="text-muted">
+                            <strong>Last Group Sync:</strong> {device.lastGroupSync ? new Date(device.lastGroupSync).toLocaleString() : 'Never'}
+                          </small>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3">
-                      <small className="text-muted">
-                        {new Date(device.lastSeen).toLocaleString()}
-                      </small>
-                    </td>
-                    <td className="px-3 py-3">
-                      <ButtonGroup size="sm">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => {
-                            console.log('Device object:', device);
-                            console.log('Device ID:', device.deviceId);
-                            handleGenerateQR(device.deviceId);
-                          }}
-                          disabled={device.status === 'connected'}
-                        >
-                          <FaQrcode />
-                        </Button>
-                        <Button
-                          variant="outline-warning"
-                          size="sm"
-                          onClick={() => handleDisconnectDevice(device.deviceId)}
-                          disabled={device.status === 'disconnected'}
-                        >
-                          <FaPowerOff />
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDeleteDevice(device.deviceId)}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </ButtonGroup>
-                    </td>
+                                         <td className="px-3 py-3">
+                       <ButtonGroup size="sm">
+                         <Button
+                           variant="outline-info"
+                           size="sm"
+                           onClick={() => handleViewDeviceDetails(device)}
+                           title="View Device Details"
+                         >
+                           <FaEye />
+                         </Button>
+                         <Button
+                           variant="outline-primary"
+                           size="sm"
+                           onClick={() => {
+                             console.log('Device object:', device);
+                             console.log('Device ID:', device.deviceId);
+                             handleGenerateQR(device.deviceId);
+                           }}
+                                                      disabled={device.isConnected === true}
+                         >
+                           <FaQrcode />
+                         </Button>
+                         <Button
+                           variant="outline-warning"
+                           size="sm"
+                           onClick={() => handleDisconnectDevice(device.deviceId)}
+                                                      disabled={!device.isConnected}
+                         >
+                           <FaPowerOff />
+                         </Button>
+                         <Button
+                           variant="outline-danger"
+                           size="sm"
+                           onClick={() => handleDeleteDevice(device.deviceId)}
+                         >
+                           <FaTrash />
+                         </Button>
+                       </ButtonGroup>
+                     </td>
                   </tr>
                 ))}
               </tbody>
@@ -481,11 +676,12 @@ const WhatsAppDevices = () => {
                   Add Your First Device
                 </Button>
               </div>
-              <div className="alert alert-info d-inline-block">
-                <small>
-                  <strong>Tip:</strong> After creating a device, you'll be able to generate a QR code to connect it to WhatsApp
-                </small>
-              </div>
+                           <div className="alert alert-info d-inline-block">
+               <small>
+                 <strong>Tip:</strong> After creating a device, you'll be able to generate a QR code to connect it to WhatsApp. 
+                 <strong>Important:</strong> You must connect the device to WhatsApp before you can send messages!
+               </small>
+             </div>
             </div>
           )}
         </Card.Body>
@@ -552,10 +748,13 @@ const WhatsAppDevices = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             <FaQrcode className="me-2 text-primary" />
-            Scan QR Code to Connect Device
+            {selectedDevice && findDeviceById(selectedDevice)?.isConnected ? 'QR Code for Device' : 'Scan QR Code to Connect Device'}
             {selectedDevice && findDeviceById(selectedDevice) && (
               <span className="text-muted ms-2 fs-6">
                 ({findDeviceById(selectedDevice)?.deviceName || 'Unknown Device'})
+                {findDeviceById(selectedDevice)?.isConnected && (
+                  <span className="text-success ms-2">• Already Connected</span>
+                )}
               </span>
             )}
           </Modal.Title>
@@ -585,44 +784,59 @@ const WhatsAppDevices = () => {
                </div>
 
                              <div className="text-start mb-4">
-                 <h6 className="fw-bold mb-3">🎯 How to Connect Your Device:</h6>
-                 <ol className="text-muted">
-                   <li className="mb-2">Open WhatsApp on your mobile phone</li>
-                   <li className="mb-2">Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-                   <li className="mb-2">Tap <strong>Link a Device</strong></li>
-                   <li className="mb-2">Point your phone camera at the QR code above</li>
-                   <li className="mb-2">Wait for the connection to complete</li>
-                 </ol>
-               </div>
+                               {selectedDevice && findDeviceById(selectedDevice)?.isConnected ? (
+                                 <>
+                                   <div className="alert alert-info mb-3">
+                                     <strong>ℹ️ Device Already Connected:</strong> This device is already connected to WhatsApp. 
+                                     You can use this QR code to reconnect if needed, or close this modal.
+                                   </div>
+                                   <h6 className="fw-bold mb-3">🔄 How to Reconnect Your Device (if needed):</h6>
+                                 </>
+                               ) : (
+                                 <h6 className="fw-bold mb-3">🎯 How to Connect Your Device:</h6>
+                               )}
+                               <ol className="text-muted">
+                                 <li className="mb-2">Open WhatsApp on your mobile phone</li>
+                                 <li className="mb-2">Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+                                 <li className="mb-2">Tap <strong>Link a Device</strong></li>
+                                 <li className="mb-2">Point your phone camera at the QR code above</li>
+                                 <li className="mb-2">Wait for the connection to complete</li>
+                               </ol>
+                             </div>
 
                              <div className="alert alert-success">
-                 <small>
-                   <strong>✅ Success!</strong> You now have a scannable QR code image. Keep this window open until you've successfully scanned the QR code.
-                   The QR code will expire after a few minutes for security reasons.
-                 </small>
-               </div>
+                               <small>
+                                 <strong>✅ Success!</strong> You now have a scannable QR code image. 
+                                 {selectedDevice && findDeviceById(selectedDevice)?.isConnected ? (
+                                   'Since this device is already connected, you can use this QR code to reconnect if needed, or close this modal.'
+                                 ) : (
+                                   'Keep this window open until you\'ve successfully scanned the QR code. The QR code will expire after a few minutes for security reasons.'
+                                 )}
+                               </small>
+                             </div>
 
                                                            {/* Device Status Indicator */}
                 {selectedDevice && (
                   <div className="mt-3">
                     <div className="d-flex align-items-center justify-content-center">
                       {(() => {
-                        const device = findDeviceById(selectedDevice);
-                        if (device) {
-                          return (
-                            <div className="d-flex align-items-center">
-                              {getStatusIcon(device.status)}
-                              <span className="ms-2">
-                                <strong>Status:</strong> {device.status}
-                              </span>
-                              {device.status === 'connected' && (
-                                <span className="ms-2 text-success">
-                                  <FaCheckCircle /> Connected to WhatsApp
-                                </span>
-                              )}
-                            </div>
-                          );
-                        }
+                                                 const device = findDeviceById(selectedDevice);
+                         if (device) {
+                           const status = device.isConnected ? 'connected' : 'disconnected';
+                           return (
+                             <div className="d-flex align-items-center">
+                               {getStatusIcon(status)}
+                               <span className="ms-2">
+                                 <strong>Status:</strong> {status}
+                               </span>
+                               {device.isConnected && (
+                                 <span className="ms-2 text-success">
+                                   <FaCheckCircle /> Connected to WhatsApp
+                                 </span>
+                               )}
+                             </div>
+                           );
+                         }
                         return (
                           <div className="d-flex align-items-center">
                             <div className="spinner-border spinner-border-sm text-primary me-2" role="status">

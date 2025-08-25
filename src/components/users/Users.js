@@ -98,7 +98,7 @@ const Users = () => {
   const handleUpdateUser = async () => {
     try {
       setUpdating(true);
-      const response = await axios.put(`/users/${selectedUser.id}`, formData);
+      const response = await axios.put(`/users/${selectedUser.userId}`, formData);
       if (response.data.error === 0) {
         toast.success('User updated successfully!');
         setShowEditModal(false);
@@ -244,7 +244,7 @@ const Users = () => {
               </thead>
               <tbody>
                 {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-bottom">
+                  <tr key={user.userId} className="border-bottom">
                     <td className="px-3 py-3">
                       <div className="d-flex align-items-center">
                         <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
@@ -298,22 +298,22 @@ const Users = () => {
                         <Button
                           variant={user.isActive ? 'outline-warning' : 'outline-success'}
                           size="sm"
-                          onClick={() => handleToggleUserStatus(user.id, user.isActive)}
+                          onClick={() => handleToggleUserStatus(user.userId, user.isActive)}
                         >
                           {user.isActive ? <FaToggleOff /> : <FaToggleOn />}
                         </Button>
-                                                 <Button
-                           variant="outline-info"
-                           size="sm"
-                           onClick={() => handleLinkToGroup(user.id)}
-                           title="Link to Group"
-                         >
+                                                                         <Button
+                          variant="outline-info"
+                          size="sm"
+                          onClick={() => handleLinkToGroup(user.userId)}
+                          title="Link to Group"
+                        >
                            <FaLink />
                          </Button>
                          <Button
                            variant="outline-danger"
                            size="sm"
-                           onClick={() => handleDeleteUser(user.id)}
+                           onClick={() => handleDeleteUser(user.userId)}
                          >
                            <FaTrash />
                          </Button>

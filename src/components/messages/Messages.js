@@ -61,7 +61,12 @@ const Messages = () => {
       await fetchMessages();
     } catch (error) {
       console.error('Error fetching data:', error);
-      toast.error('Failed to load data');
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else {
+        toast.error('Failed to load data');
+      }
     } finally {
       setLoading(false);
     }
@@ -80,7 +85,12 @@ const Messages = () => {
       }
     } catch (error) {
       console.error('Error fetching messages:', error);
-      toast.error('Failed to load messages');
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else {
+        toast.error('Failed to load messages');
+      }
     }
   };
 
@@ -106,7 +116,12 @@ const Messages = () => {
         fetchMessages(); // Refresh messages
       }
     } catch (error) {
-      toast.error('Failed to send message: ' + error.message);
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else {
+        toast.error('Failed to send message: ' + error.message);
+      }
     } finally {
       setSending(false);
     }

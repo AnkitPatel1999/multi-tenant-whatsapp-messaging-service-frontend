@@ -9,24 +9,14 @@ import {
   Form, 
   Table, 
   Spinner,
-  ButtonGroup,
   InputGroup
 } from 'react-bootstrap';
 import { 
   FaUsers, 
   FaPlus, 
   FaSearch,
-  FaEdit,
-  FaTrash,
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaShieldAlt,
   FaToggleOn,
   FaToggleOff,
-  FaLink,
-  FaComments,
-  FaAddressBook,
   FaSync
 } from 'react-icons/fa';
 import axios from 'axios';
@@ -36,13 +26,10 @@ const Groups = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [creating, setCreating] = useState(false);
-  const [updating, setUpdating] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    groupName: '',
     description: '',
     isActive: true
   });
@@ -73,7 +60,7 @@ const Groups = () => {
       if (response.data.error === 0) {
         toast.success('Group created successfully!');
         setShowCreateModal(false);
-        setFormData({ name: '', description: '', isActive: true });
+        setFormData({ groupName: '', description: '', isActive: true });
         fetchGroups();
       }
     } catch (error) {
@@ -83,50 +70,14 @@ const Groups = () => {
     }
   };
 
-  const handleUpdateGroup = async () => {
-    try {
-      setUpdating(true);
-      const response = await axios.put(`/groups/${selectedGroup.id}`, formData);
-      if (response.data.error === 0) {
-        toast.success('Group updated successfully!');
-        setShowEditModal(false);
-        setSelectedGroup(null);
-        setFormData({ name: '', description: '', isActive: true });
-        fetchGroups();
-      }
-    } catch (error) {
-      toast.error('Failed to update group: ' + error.message);
-    } finally {
-      setUpdating(false);
-    }
-  };
 
-  const handleDeleteGroup = async (groupId) => {
-    if (window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
-      try {
-        const response = await axios.delete(`/groups/${groupId}`);
-        if (response.data.error === 0) {
-          toast.success('Group deleted successfully!');
-          fetchGroups();
-        }
-      } catch (error) {
-        toast.error('Failed to delete group: ' + error.message);
-      }
-    }
-  };
 
-  const handleEditGroup = (group) => {
-    setSelectedGroup(group);
-    setFormData({
-      name: group.name || '',
-      description: group.description || '',
-      isActive: group.isActive !== undefined ? group.isActive : true
-    });
-    setShowEditModal(true);
-  };
+
+
+
 
   const filteredGroups = groups.filter(group =>
-    group.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.groupName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -206,18 +157,17 @@ const Groups = () => {
           {filteredGroups.length > 0 ? (
             <Table responsive className="mb-0">
               <thead className="bg-light">
-                <tr>
-                  <th className="border-0 px-3 py-3">Group</th>
-                  <th className="border-0 px-3 py-3">Description</th>
-                  <th className="border-0 px-3 py-3">Status</th>
-                  <th className="border-0 px-3 py-3">Members</th>
-                  <th className="border-0 px-3 py-3">Created</th>
-                  <th className="border-0 px-3 py-3">Actions</th>
-                </tr>
+                                 <tr>
+                   <th className="border-0 px-3 py-3">Group</th>
+                   <th className="border-0 px-3 py-3">Description</th>
+                   <th className="border-0 px-3 py-3">Status</th>
+                   <th className="border-0 px-3 py-3">Members</th>
+                   <th className="border-0 px-3 py-3">Created</th>
+                 </tr>
               </thead>
               <tbody>
                 {filteredGroups.map((group) => (
-                  <tr key={group.id} className="border-bottom">
+                  <tr key={group.groupId} className="border-bottom">
                     <td className="px-3 py-3">
                       <div className="d-flex align-items-center">
                         <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -225,8 +175,8 @@ const Groups = () => {
                           <FaUsers size={20} className="text-primary" />
                         </div>
                         <div>
-                          <h6 className="mb-0 fw-bold">{group.name}</h6>
-                          <small className="text-muted">ID: {group.id}</small>
+                          <h6 className="mb-0 fw-bold">{group.groupName}</h6>
+                          <small className="text-muted">ID: {group.groupId}</small>
                         </div>
                       </div>
                     </td>
@@ -244,29 +194,11 @@ const Groups = () => {
                         {group.memberCount || 0} members
                       </Badge>
                     </td>
-                    <td className="px-3 py-3">
-                      <small className="text-muted">
-                        {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
-                      </small>
-                    </td>
-                    <td className="px-3 py-3">
-                      <ButtonGroup size="sm">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleEditGroup(group)}
-                        >
-                          <FaEdit />
-                        </Button>
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={() => handleDeleteGroup(group.id)}
-                        >
-                          <FaTrash />
-                        </Button>
-                      </ButtonGroup>
-                    </td>
+                                         <td className="px-3 py-3">
+                       <small className="text-muted">
+                         {group.createdAt ? new Date(group.createdAt).toLocaleDateString() : 'N/A'}
+                       </small>
+                     </td>
                   </tr>
                 ))}
               </tbody>
@@ -306,8 +238,8 @@ const Groups = () => {
               <Form.Control
                 type="text"
                 placeholder="Enter group name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={formData.groupName}
+                onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
                 required
               />
             </Form.Group>
@@ -338,7 +270,7 @@ const Groups = () => {
           <Button
             variant="success"
             onClick={handleCreateGroup}
-            disabled={creating || !formData.name.trim()}
+            disabled={creating || !formData.groupName.trim()}
           >
             {creating ? (
               <>
@@ -352,63 +284,7 @@ const Groups = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Edit Group Modal */}
-      <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Group</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label>Group Name</Form.Label>
-              <Form.Control
-                type="text"
-                placeholder="Enter group name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                placeholder="Enter group description (optional)"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="checkbox"
-                label="Group is active"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowEditModal(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleUpdateGroup}
-            disabled={updating || !formData.name.trim()}
-          >
-            {updating ? (
-              <>
-                <Spinner animation="border" size="sm" className="me-2" />
-                Updating...
-              </>
-            ) : (
-              'Update Group'
-            )}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      
     </div>
   );
 };
