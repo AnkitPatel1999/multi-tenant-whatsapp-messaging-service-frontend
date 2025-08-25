@@ -1,0 +1,717 @@
+{
+  "info": {
+    "name": "Alchemy WhatsApp API",
+    "description": "Complete API collection for WhatsApp device management, messaging, and user management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "c7f600c9-3ca3-4dc0-8d56-caa4c876c9d3",
+      "type": "string"
+    },
+    {
+      "key": "device_id",
+      "value": "b450e061-8978-457e-9d89-a8b1f02856d4",
+      "type": "string"
+    },
+    {
+      "key": "group_id",
+      "value": "ca80ef0e-5b44-4284-85a1-f4e418f2364e",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Authenticate a user and return a JWT token"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/auth/login",
+                  "host": ["{{base_url}}"],
+                  "path": ["auth", "login"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"user\": {\n      \"userId\": \"c7f600c9-3ca3-4dc0-8d56-caa4c876c9d3\",\n      \"email\": \"admin@example.com\",\n      \"role\": \"admin\",\n      \"isActive\": true\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "item": [
+        {
+          "name": "Create New User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"user123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"user\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            },
+            "description": "Create a new user (Admin-only)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"user123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"user\",\n  \"isActive\": true\n}"
+            },
+                "url": {
+                  "raw": "{{base_url}}/users",
+                  "host": ["{{base_url}}"],
+                  "path": ["users"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"User created successfully\",\n  \"data\": {\n    \"userId\": \"new-user-id-here\",\n    \"email\": \"user@example.com\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"role\": \"user\",\n    \"isActive\": true,\n    \"createdAt\": \"2025-08-25T04:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Assign User to Group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"groupId\": \"{{group_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}/group",
+              "host": ["{{base_url}}"],
+              "path": ["users", "{{user_id}}", "group"]
+            },
+            "description": "Assign a user to a group (Admin-only)"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"groupId\": \"{{group_id}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/users/{{user_id}}/group",
+                  "host": ["{{base_url}}"],
+                  "path": ["users", "{{user_id}}", "group"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"User assigned to group successfully\",\n  \"data\": {\n    \"userId\": \"{{user_id}}\",\n    \"groupId\": \"{{group_id}}\",\n    \"assignedAt\": \"2025-08-25T04:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WhatsApp Devices",
+      "item": [
+        {
+          "name": "List WhatsApp Devices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices"]
+            },
+            "description": "List linked WhatsApp devices for the authenticated user"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Devices retrieved successfully\",\n  \"data\": [\n    {\n      \"_id\": \"68ab539be930f76503b9a1f6\",\n      \"deviceId\": \"{{device_id}}\",\n      \"deviceName\": \"My Business WhatsApp\",\n      \"phoneNumber\": \"+1234567890\",\n      \"isConnected\": true,\n      \"isActive\": true,\n      \"lastConnectedAt\": \"2025-08-25T04:13:11.081Z\",\n      \"lastContactSync\": \"2025-08-25T04:13:16.326Z\",\n      \"lastGroupSync\": \"2025-08-25T04:13:21.407Z\",\n      \"createdAt\": \"2025-08-24T18:02:03.103Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create WhatsApp Device",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceName\": \"My New WhatsApp Device\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices"]
+            },
+            "description": "Generate a QR code for WhatsApp authentication for a new device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"deviceName\": \"My New WhatsApp Device\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Device created successfully\",\n  \"data\": {\n    \"deviceId\": \"new-device-id-here\",\n    \"deviceName\": \"My New WhatsApp Device\",\n    \"isConnected\": false,\n    \"isActive\": true,\n    \"createdAt\": \"2025-08-25T04:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Generate QR Code",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/qr",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices", "{{device_id}}", "qr"]
+            },
+            "description": "Generate QR code for device connection"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/qr",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices", "{{device_id}}", "qr"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"QR code generated successfully\",\n  \"data\": {\n    \"qrCodeImage\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...\",\n    \"qrCode\": \"2@06sFF8NzhbdY42/CZ85VCU4vlZXAcCNMRr8XH6QQ2xqk3ck1HM+ehvdNMQRGYngsiMseSjJ1hmHDUGqnvYNxL4E4XTonGjEQ1kU=\",\n    \"qrExpiry\": \"2025-08-25T04:17:40.413Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Device Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/details",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices", "{{device_id}}", "details"]
+            },
+            "description": "Get detailed information about a specific device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/details",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices", "{{device_id}}", "details"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Device details retrieved successfully\",\n  \"data\": {\n    \"deviceId\": \"{{device_id}}\",\n    \"deviceName\": \"My Business WhatsApp\",\n    \"phoneNumber\": \"+1234567890\",\n    \"isConnected\": true,\n    \"isActive\": true,\n    \"lastConnectedAt\": \"2025-08-25T04:13:11.081Z\",\n    \"lastContactSync\": \"2025-08-25T04:13:16.326Z\",\n    \"lastGroupSync\": \"2025-08-25T04:13:21.407Z\",\n    \"createdAt\": \"2025-08-24T18:02:03.103Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Device Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/messages",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices", "{{device_id}}", "messages"]
+            },
+            "description": "Get messages for a specific device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/messages",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices", "{{device_id}}", "messages"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Device messages retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"msg_123\",\n      \"content\": \"Hello from device!\",\n      \"from\": \"1234567890@c.us\",\n      \"to\": \"9876543210@c.us\",\n      \"type\": \"text\",\n      \"direction\": \"outgoing\",\n      \"timestamp\": \"2025-08-25T04:00:00.000Z\",\n      \"status\": \"delivered\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Device Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices", "{{device_id}}", "contacts"]
+            },
+            "description": "Get contacts for a specific device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/contacts",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices", "{{device_id}}", "contacts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Device contacts retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"contact_123\",\n      \"contactName\": \"John Doe\",\n      \"phoneNumber\": \"+1234567890\",\n      \"email\": \"john@example.com\",\n      \"notes\": \"Business contact\",\n      \"isActive\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Device Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/groups",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "devices", "{{device_id}}", "groups"]
+            },
+            "description": "Get groups for a specific device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/devices/{{device_id}}/groups",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "devices", "{{device_id}}", "groups"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Device groups retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"group_123\",\n      \"groupId\": \"{{group_id}}\",\n      \"groupName\": \"Business Team\",\n      \"description\": \"Team communication\",\n      \"memberCount\": 15,\n      \"isActive\": true\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "item": [
+        {
+          "name": "Send WhatsApp Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"{{device_id}}\",\n  \"to\": \"1234567890@c.us\",\n  \"message\": \"Hello! This is a test message from the API.\",\n  \"type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/whatsapp/send",
+              "host": ["{{base_url}}"],
+              "path": ["whatsapp", "send"]
+            },
+            "description": "Send a WhatsApp message to a phone number or group from a specified linked device"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"deviceId\": \"{{device_id}}\",\n  \"to\": \"1234567890@c.us\",\n  \"message\": \"Hello! This is a test message from the API.\",\n  \"type\": \"text\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/whatsapp/send",
+                  "host": ["{{base_url}}"],
+                  "path": ["whatsapp", "send"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Message sent successfully\",\n  \"data\": {\n    \"messageId\": \"msg_456\",\n    \"to\": \"1234567890@c.us\",\n    \"status\": \"sent\",\n    \"sentAt\": \"2025-08-25T04:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Data Retrieval",
+      "item": [
+        {
+          "name": "Get Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/messages?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["messages"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "description": "Number of messages to retrieve"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{user_id}}",
+                  "description": "Filter by user ID (optional)"
+                },
+                {
+                  "key": "groupId",
+                  "value": "{{group_id}}",
+                  "description": "Filter by group ID (optional)"
+                }
+              ]
+            },
+            "description": "Retrieve message logs for the authenticated user's tenant"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/messages?limit=50",
+                  "host": ["{{base_url}}"],
+                  "path": ["messages"],
+                  "query": [
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Messages retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"msg_123\",\n      \"content\": \"Hello! How are you?\",\n      \"from\": \"1234567890@c.us\",\n      \"to\": \"9876543210@c.us\",\n      \"type\": \"text\",\n      \"direction\": \"outgoing\",\n      \"timestamp\": \"2025-08-25T04:00:00.000Z\",\n      \"status\": \"delivered\",\n      \"deviceId\": \"{{device_id}}\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Contacts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/contacts",
+              "host": ["{{base_url}}"],
+              "path": ["contacts"]
+            },
+            "description": "Retrieve stored contacts for the authenticated user"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/contacts",
+                  "host": ["{{base_url}}"],
+                  "path": ["contacts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Contacts retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"contact_123\",\n      \"name\": \"John Doe\",\n      \"phoneNumber\": \"+1234567890\",\n      \"email\": \"john.doe@example.com\",\n      \"notes\": \"Business contact\",\n      \"isActive\": true,\n      \"createdAt\": \"2025-08-25T04:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Groups",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/groups",
+              "host": ["{{base_url}}"],
+              "path": ["groups"]
+            },
+            "description": "Retrieve stored chat groups for the authenticated user"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/messages",
+                  "host": ["{{base_url}}"],
+                  "path": ["messages"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "cookie": [],
+              "body": "{\n  \"error\": 0,\n  \"message\": \"Groups retrieved successfully\",\n  \"data\": [\n    {\n      \"id\": \"group_123\",\n      \"groupId\": \"{{group_id}}\",\n      \"groupName\": \"Business Team\",\n      \"description\": \"Team communication group\",\n      \"isActive\": true,\n      \"memberCount\": 15,\n      \"createdAt\": \"2025-08-25T04:00:00.000Z\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

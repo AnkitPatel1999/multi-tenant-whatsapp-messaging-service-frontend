@@ -29,13 +29,17 @@ const Groups = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [creating, setCreating] = useState(false);
   const [formData, setFormData] = useState({
-    groupName: '',
+    name: '',
     description: '',
-    isActive: true
+    isActive: true,
+    whatsappGroupId: '',
+    deviceId: ''
   });
+  const [devices, setDevices] = useState([]);
 
   useEffect(() => {
     fetchGroups();
+    fetchDevices();
   }, []);
 
   const fetchGroups = async () => {
@@ -53,18 +57,44 @@ const Groups = () => {
     }
   };
 
+  const fetchDevices = async () => {
+    try {
+      const response = await axios.get('/whatsapp/devices');
+      if (response.data.error === 0) {
+        setDevices(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching devices:', error);
+      // Don't show error toast for devices as it's not critical
+    }
+  };
+
   const handleCreateGroup = async () => {
     try {
       setCreating(true);
-      const response = await axios.post('/groups', formData);
+      
+      // Generate a unique WhatsApp group ID if not provided
+      const groupData = {
+        ...formData,
+        whatsappGroupId: formData.whatsappGroupId || `group_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        deviceId: formData.deviceId || (devices.length > 0 ? devices[0].deviceId : 'default')
+      };
+      
+      const response = await axios.post('/groups', groupData);
       if (response.data.error === 0) {
         toast.success('Group created successfully!');
         setShowCreateModal(false);
-        setFormData({ groupName: '', description: '', isActive: true });
+        setFormData({ name: '', description: '', isActive: true, whatsappGroupId: '', deviceId: '' });
         fetchGroups();
       }
     } catch (error) {
-      toast.error('Failed to create group: ' + error.message);
+      console.error('Group creation error:', error);
+      const confidentialError = error.response?.data?.confidentialErrorMessage;
+      if (confidentialError) {
+        toast.error(confidentialError);
+      } else {
+        toast.error('Failed to create group: ' + (error.response?.data?.message || error.message));
+      }
     } finally {
       setCreating(false);
     }
@@ -77,7 +107,7 @@ const Groups = () => {
 
 
   const filteredGroups = groups.filter(group =>
-    group.groupName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     group.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -167,7 +197,7 @@ const Groups = () => {
               </thead>
               <tbody>
                 {filteredGroups.map((group) => (
-                  <tr key={group.groupId} className="border-bottom">
+                  <tr key={group.whatsappGroupId || group._id} className="border-bottom">
                     <td className="px-3 py-3">
                       <div className="d-flex align-items-center">
                         <div className="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3"
@@ -175,8 +205,8 @@ const Groups = () => {
                           <FaUsers size={20} className="text-primary" />
                         </div>
                         <div>
-                          <h6 className="mb-0 fw-bold">{group.groupName}</h6>
-                          <small className="text-muted">ID: {group.groupId}</small>
+                          <h6 className="mb-0 fw-bold">{group.name || group.groupName}</h6>
+                          <small className="text-muted">ID: {group.whatsappGroupId || group.groupId || 'N/A'}</small>
                         </div>
                       </div>
                     </td>
@@ -232,14 +262,24 @@ const Groups = () => {
           <Modal.Title>Create New Group</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          <div className="alert alert-info mb-3">
+            <small>
+              <strong>Note:</strong> The following fields are required by the backend:
+              <ul className="mb-0 mt-1">
+                <li><strong>name</strong> - Group name</li>
+                <li><strong>whatsappGroupId</strong> - Unique WhatsApp group identifier</li>
+                <li><strong>deviceId</strong> - Associated WhatsApp device</li>
+              </ul>
+            </small>
+          </div>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>Group Name</Form.Label>
+              <Form.Label>Group Name *</Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter group name"
-                value={formData.groupName}
-                onChange={(e) => setFormData({ ...formData, groupName: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
               />
             </Form.Group>
@@ -252,6 +292,35 @@ const Groups = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>WhatsApp Group ID *</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter WhatsApp group ID (will auto-generate if empty)"
+                value={formData.whatsappGroupId}
+                onChange={(e) => setFormData({ ...formData, whatsappGroupId: e.target.value })}
+              />
+              <Form.Text className="text-muted">
+                Leave empty to auto-generate a unique ID
+              </Form.Text>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Device ID *</Form.Label>
+              <Form.Select
+                value={formData.deviceId}
+                onChange={(e) => setFormData({ ...formData, deviceId: e.target.value })}
+              >
+                <option value="">Select a device (optional)</option>
+                {devices.map((device) => (
+                  <option key={device.deviceId} value={device.deviceId}>
+                    {device.deviceName} - {device.isConnected ? 'Connected' : 'Disconnected'}
+                  </option>
+                ))}
+              </Form.Select>
+              <Form.Text className="text-muted">
+                Select a WhatsApp device to associate with this group
+              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Check
@@ -270,7 +339,7 @@ const Groups = () => {
           <Button
             variant="success"
             onClick={handleCreateGroup}
-            disabled={creating || !formData.groupName.trim()}
+            disabled={creating || !formData.name.trim() || !formData.deviceId}
           >
             {creating ? (
               <>

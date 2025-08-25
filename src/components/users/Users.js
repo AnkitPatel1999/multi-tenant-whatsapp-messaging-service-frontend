@@ -288,13 +288,7 @@ const Users = () => {
                     </td>
                     <td className="px-3 py-3">
                       <ButtonGroup size="sm">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <FaEdit />
-                        </Button>
+                        
                         <Button
                           variant={user.isActive ? 'outline-warning' : 'outline-success'}
                           size="sm"
