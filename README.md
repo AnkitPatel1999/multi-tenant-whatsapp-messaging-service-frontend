@@ -119,7 +119,7 @@ src/
 1. Navigate to the login page
 2. Use demo credentials:
    - Email: `admin@example.com`
-   - Password: `SecurePassword123!`
+   - Password: `admin123`
 
 ### Dashboard
 - View system statistics

@@ -127,7 +127,7 @@ const Login = () => {
 
                 <div className="text-center mt-4">
                   <small className="text-muted">
-                    Demo Credentials: admin@example.com / SecurePassword123!
+                    Demo Credentials: admin@example.com / admin123
                   </small>
                 </div>
               </Card.Body>
